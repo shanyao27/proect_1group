@@ -1,0 +1,151 @@
+/* Admin.css */
+.admin-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+
+.admin-header {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-title {
+    color: #2c3e50;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.admin-content {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+    .users-table th,
+    .users-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .users-table th {
+        background-color: #f8f9fa;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .users-table tr:hover {
+        background-color: #f8f9fa;
+    }
+
+.action-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 5px;
+    transition: all 0.3s;
+}
+
+.edit-button {
+    background-color: #3498db;
+    color: white;
+}
+
+    .edit-button:hover {
+        background-color: #2980b9;
+    }
+
+.delete-button {
+    background-color: #e74c3c;
+    color: white;
+}
+
+    .delete-button:hover {
+        background-color: #c0392b;
+    }
+
+.back-button {
+    background-color: #95a5a6;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+    .back-button:hover {
+        background-color: #7f8c8d;
+    }
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+    .stat-card h3 {
+        color: #7f8c8d;
+        font-size: 16px;
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+
+    .stat-card p {
+        color: #2c3e50;
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+.search-bar {
+    margin-bottom: 20px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .users-table {
+        display: block;
+        overflow-x: auto;
+    }
+}

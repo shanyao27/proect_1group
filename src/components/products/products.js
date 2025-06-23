@@ -1,148 +1,337 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
 import './products.css';
-
-
-import skin1 from './photos/Desert Eagle Blaze.png';
-import skin2 from './photos/AWP Dragon Lore.png';
-import skin3 from './photos/kill_confirmed.png';
-import skin4 from './photos/Karambit Doppler (Ruby).png';
-import skin5 from './photos/Butterfly Knife Fade.jpg';
-import skin6 from './photos/M9 Bayonet Crimson Web.jpg';
-import skin7 from './photos/AK-47 Fire Serpent.png';
-import skin8 from './photos/M4A4 Howl.png';
-import skin9 from './photos/AWP Medusa.jpg';
-import skin10 from './photos/MP9 Stained Glass.png';
-import skin11 from './photos/P90 Death by Kitty.jpg';
-import skin12 from './photos/Glock-18 Fade.jpg';
-import skin13 from './photos/AWP Gungnir.png';
-import skin14 from './photos/M4A1-S Printstream.jpg';
-import skin15 from './photos/Skeleton Knife Case Hardened.png';
-
+import { useNavigate, useLocation } from 'react-router-dom';
+import { FaFilter, FaChevronDown, FaChevronUp, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { CSSTransition } from 'react-transition-group';
 
 const Products = () => {
     const navigate = useNavigate();
-    const products = [
-        {
-            id: 1,
-            name: 'Desert Eagle | Blaze',
-            price: 350,
-            image: skin1
-        },
-        {
-            id: 2,
-            name: 'AWP | Dragon Lore',
-            price: 12000,
-            image: skin2
-        },
-        {
-            id: 3,
-            name: 'USP-S | Kill Confirmed',
-            price: 200,
-            image: skin3
-        },
-        {
-            id: 4,
-            name: 'Karambit | Doppler (Ruby)',
-            price: 5000,
-            image: skin4
-        },
-        {
-            id: 5,
-            name: 'Butterfly Knife | Fade',
-            price: 1500,
-            image: skin5
-        },
-        {
-            id: 6,
-            name: 'M9 Bayonet | Crimson Web',
-            price: 1200,
-            image: skin6
-        },
-        {
-            id: 7,
-            name: 'AK-47 | Fire Serpent',
-            price: 1500,
-            image: skin7
-        },
-        {
-            id: 8,
-            name: 'M4A4 | Howl',
-            price: 3500,
-            image: skin8
-        },
-        {
-            id: 9,
-            name: 'AWP | Medusa',
-            price: 2000,
-            image: skin9
-        },
-        {
-            id: 10,
-            name: 'MP9 | Stained Glass',
-            price: 100,
-            image: skin10
-        },
-        {
-            id: 11,
-            name: 'P90 | Death by Kitty',
-            price: 200,
-            image: skin11
-        },
-        {
-            id: 12,
-            name: 'Glock-18 | Fade',
-            price: 150,
-            image: skin12
-        },
-        {
-            id: 13,
-            name: 'AWP | Gungnir',
-            price: 6000,
-            image: skin13
-        },
-        {
-            id: 14,
-            name: 'M4A1-S | Printstream',
-            price: 400,
-            image: skin14
-        },
-        {
-            id: 15,
-            name: 'Skeleton Knife | Marble Fade',
-            price: 1100,
-            image: skin15
-        }
-    ];
+    const location = useLocation();
+    const user = location.state?.userData;
+    const filtersRef = useRef(null);
+    const [products, setProducts] = useState([]);
 
-return (
+    useEffect(() => {
+        const loadProducts = () => {
+            const savedProducts = localStorage.getItem('productsData');
+            const initialProducts = savedProducts ? JSON.parse(savedProducts) : [];
+            setProducts(initialProducts);
+        };
+
+        loadProducts();
+
+        const handleStorageChange = (e) => {
+            if (e.key === 'productsData') {
+                loadProducts(); // Перезагружаем продукты при изменении
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, []);
+
+    // Функция для получения изображения товара
+    const getProductImage = (product) => {
+        if (product.img) {
+            return product.img; // Используем сохраненное изображение
+        }
+
+        // Можно добавить дефолтное изображение
+        return 'https://via.placeholder.com/300'; // Замените на путь к вашему дефолтному изображению
+    };
+
+    const handleProductClick = (productId) => {
+        navigate(`/products/${productId}`, { state: { userData: user } });
+    };
+
+    // Состояния для фильтров
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [showFilters, setShowFilters] = useState(false);
+    const [filters, setFilters] = useState({
+        sortBy: 'default',
+        sortDirection: 'asc',
+        category: 'all',
+        minPrice: 0,
+        maxPrice: Math.max(...products.map(p => p.price), 100000) // Добавим fallback значение
+    });
+
+    const [appliedFilters, setAppliedFilters] = useState({ ...filters });
+    const productsPerPage = 6;
+
+    // Фильтрация и сортировка товаров
+    const filteredProducts = products
+        .filter(product => {
+            const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesCategory = appliedFilters.category === 'all' || product.category === appliedFilters.category;
+            const matchesPrice = product.price >= appliedFilters.minPrice &&
+                product.price <= appliedFilters.maxPrice;
+
+            return matchesSearch && matchesCategory && matchesPrice;
+        })
+        .sort((a, b) => {
+            let compareResult = 0;
+
+            switch (appliedFilters.sortBy) {
+                case 'price':
+                    compareResult = a.price - b.price;
+                    break;
+                case 'name':
+                    compareResult = a.name.localeCompare(b.name);
+                    break;
+                default:
+                    return 0;
+            }
+
+            return appliedFilters.sortDirection === 'asc' ? compareResult : -compareResult;
+        });
+
+    // Пагинация
+    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+    const smoothScrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        smoothScrollToTop();
+    };
+
+    const applyFilters = () => {
+        setAppliedFilters(filters);
+        setCurrentPage(1);
+        setShowFilters(false);
+        smoothScrollToTop();
+    };
+
+    const resetFilters = () => {
+        const defaultFilters = {
+            sortBy: 'default',
+            sortDirection: 'asc',
+            category: 'all',
+            minPrice: 0,
+            maxPrice: Math.max(...products.map(p => p.price), 100000)
+        };
+        setFilters(defaultFilters);
+        setAppliedFilters(defaultFilters);
+        setCurrentPage(1);
+        setShowFilters(false);
+        smoothScrollToTop();
+    };
+
+    const toggleSortDirection = () => {
+        setFilters(prev => ({
+            ...prev,
+            sortDirection: prev.sortDirection === 'asc' ? 'desc' : 'asc'
+        }));
+    };
+
+    // Получаем уникальные категории для фильтра
+    const categories = [...new Set(products.map(p => p.category))];
+
+    return (
         <div className="products-page">
             <nav className="products-nav">
-                <div className="nav-left">
-                    <button className="back-button" onClick={() => navigate(-1)}>
+                <div className="nav-buttons">
+                    <button className="nav-button" onClick={() => navigate('/menu', { state: { userData: user } })}>
                         Назад
                     </button>
-                    <button className="back-button" onClick={() => navigate('/profile')}>
+                    <button
+                        className="nav-button"
+                        onClick={() => navigate('/profile', { state: { userData: user } })}
+                    >
                         Профиль
                     </button>
                 </div>
-                <h1 className="products-title">Товары</h1>
+                <h1 className="products-title">GoslingShop</h1>
                 <div className="nav-placeholder"></div>
             </nav>
 
-            <div className="products-gallery">
-                {products.map((product) => (
-                    <div key={product.id} className="product-card">
-                        <img src={product.image} alt={product.name} className="product-image" />
-                        <h3 className="product-name">{product.name}</h3>
-                        <p className="product-price">${product.price}</p>
-                        <button className="add-to-cart">Посмотреть</button>
+            <div className="search-container">
+                <div className="search-bar">
+                    <input
+                        type="text"
+                        placeholder="Поиск товаров..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <button
+                        className="toggle-filters"
+                        onClick={() => setShowFilters(!showFilters)}
+                    >
+                        <FaFilter />
+                        {showFilters ? <FaChevronUp /> : <FaChevronDown />}
+                    </button>
+                </div>
+
+                <CSSTransition
+                    in={showFilters}
+                    nodeRef={filtersRef}
+                    timeout={300}
+                    classNames="filters-transition"
+                    unmountOnExit
+                >
+                    <div className="filters-panel" ref={filtersRef}>
+                        <div className="sort-container">
+                            <div className="filter-group">
+                                <label>Сортировка:</label>
+                                <select
+                                    value={filters.sortBy}
+                                    onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
+                                >
+                                    <option value="default">По умолчанию</option>
+                                    <option value="price">Цена</option>
+                                    <option value="name">Название</option>
+                                </select>
+                            </div>
+
+                            {filters.sortBy !== 'default' && (
+                                <div className="sort-direction-buttons">
+                                    <button
+                                        className={`sort-btn ${filters.sortDirection === 'asc' ? 'active' : ''}`}
+                                        onClick={toggleSortDirection}
+                                        aria-label={filters.sortDirection === 'asc' ? 'По возрастанию' : 'По убыванию'}
+                                    >
+                                        <FaArrowUp />
+                                    </button>
+                                    <button
+                                        className={`sort-btn ${filters.sortDirection === 'desc' ? 'active' : ''}`}
+                                        onClick={toggleSortDirection}
+                                        aria-label={filters.sortDirection === 'desc' ? 'По убыванию' : 'По возрастанию'}
+                                    >
+                                        <FaArrowDown />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="filter-group">
+                            <label>Категория:</label>
+                            <select
+                                value={filters.category}
+                                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                            >
+                                <option value="all">Все категории</option>
+                                {categories.map(category => (
+                                    <option key={category} value={category}>{category}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="filter-group">
+                            <label>Цена: от {filters.minPrice} до {filters.maxPrice}</label>
+                            <div className="price-range">
+                                <input
+                                    type="number"
+                                    value={filters.minPrice}
+                                    onChange={(e) => setFilters({ ...filters, minPrice: parseInt(e.target.value) || 0 })}
+                                    min="0"
+                                />
+                                <span>-</span>
+                                <input
+                                    type="number"
+                                    value={filters.maxPrice}
+                                    onChange={(e) => setFilters({ ...filters, maxPrice: parseInt(e.target.value) || 0 })}
+                                    min={filters.minPrice}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="filter-actions">
+                            <button className="apply-btn" onClick={applyFilters}>
+                                Применить
+                            </button>
+                            <button className="reset-btn" onClick={resetFilters}>
+                                Сбросить
+                            </button>
+                        </div>
                     </div>
-                ))}
+                </CSSTransition>
             </div>
 
+            <div className="products-gallery">
+                {currentProducts.length > 0 ? (
+                    currentProducts.map(product => (
+                        <div
+                            key={product.id}
+                            className="product-card"
+                            onClick={() => handleProductClick(product.id)}
+                        >
+                            <img
+                                src={getProductImage(product)}
+                                alt={product.name}
+                                className="product-image"
+                                onError={(e) => {
+                                    e.target.src = 'https://via.placeholder.com/300'; // Fallback изображение
+                                }}
+                            />
+                            <div className="product-info">
+                                <h3 className="product-name">{product.name}</h3>
+                                <div className="product-meta">
+                                    <span className="product-category">{product.category}</span>
+                                    <span className="product-seller">
+                                        Продавец: {product.name_seller || 'Не указан'}
+                                    </span>
+                                </div>
+                                <p className="product-price">₽{product.price.toFixed(2)}</p>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="no-products">
+                        <h3>Товары не найдены</h3>
+                        <p>Попробуйте изменить параметры поиска</p>
+                    </div>
+                )}
+            </div>
+
+            {filteredProducts.length > productsPerPage && (
+                <div className="search-pagination-container">
+                    <div className="pagination">
+                        <button
+                            className="pagination-button"
+                            onClick={() => handlePageChange(1)}
+                            disabled={currentPage === 1}
+                        >
+                            В начало
+                        </button>
+                        <button
+                            className="pagination-button"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                        >
+                            ← Назад
+                        </button>
+                        <span className="current-page">
+                            Страница {currentPage} из {totalPages}
+                        </span>
+                        <button
+                            className="pagination-button"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                        >
+                            Вперёд →
+                        </button>
+                        <button
+                            className="pagination-button"
+                            onClick={() => handlePageChange(totalPages)}
+                            disabled={currentPage === totalPages}
+                        >
+                            В конец
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <footer className="products-footer">
-                <p>© 2024 GoslingShop. Все права защищены.</p>
+                <p>© 2025 GoslingShop. Все права защищены.</p>
             </footer>
         </div>
     );

@@ -4,6 +4,7 @@ import './LoginPage.css';
 import { authenticateUser } from '../../data/Users';
 
 const LoginPage = () => {
+    
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');

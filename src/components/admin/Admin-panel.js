@@ -1,190 +1,183 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import './admin.css';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import './productDetails.css';
 
-const Admin = () => {
-    const [users, setUsers] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [editingUserId, setEditingUserId] = useState(null);
-    const [editFormData, setEditFormData] = useState({
-        name: '',
-        email: '',
-        password: '',
-        role: 'user'
-    });
+const ProductDetails = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { id } = useParams();
+    const user = location.state?.userData;
+    const [product, setProduct] = useState(null);
+    const [sellerContact, setSellerContact] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    const [description, setDescription] = useState('');
 
     useEffect(() => {
-        const storedUsers = JSON.parse(localStorage.getItem('appUsers')) || [];
-        setUsers(storedUsers);
-    }, []);
+        const loadProductAndSeller = async () => {
+            try {
+                // Загрузка товара
+                const savedProducts = localStorage.getItem('productsData');
+                if (!savedProducts) throw new Error('No products data');
+                const products = JSON.parse(savedProducts);
+                const foundProduct = products.find(p => p.id.toString() === id);
+                if (!foundProduct) throw new Error('Product not found');
 
-    const handleEditClick = (user) => {
-        setEditingUserId(user.id);
-        setEditFormData({
-            name: user.name,
-            email: user.email,
-            password: user.password,
-            role: user.role || 'user'
-        });
-    };
+                // Загрузка контактов продавца
+                const savedSellers = localStorage.getItem('sellersData');
+                if (savedSellers) {
+                    const sellers = JSON.parse(savedSellers);
+                    const seller = sellers.find(s => s.name === foundProduct.name_seller);
+                    if (seller) {
+                        setSellerContact(seller.email || 'Контакт не указан');
+                    }
+                }
 
-    const handleEditFormChange = (e) => {
-        const { name, value } = e.target;
-        setEditFormData({
-            ...editFormData,
-            [name]: value
-        });
-    };
-
-    const handleSaveClick = () => {
-        const updatedUsers = users.map(user => {
-            if (user.id === editingUserId) {
-                return {
-                    ...user,
-                    ...editFormData
-                };
+                setProduct(foundProduct);
+                setDescription(foundProduct.description || '');
+            } catch (error) {
+                console.error('Error loading data:', error);
+            } finally {
+                setIsLoading(false);
             }
-            return user;
-        });
+        };
 
-        setUsers(updatedUsers);
-        localStorage.setItem('appUsers', JSON.stringify(updatedUsers));
-        setEditingUserId(null);
+        loadProductAndSeller();
+    }, [id]);
+
+    const handleSaveDescription = () => {
+        if (!product || !user || user.role !== 'superadmin') return;
+
+        const updatedProduct = {
+            ...product,
+            description: description
+        };
+
+        const products = JSON.parse(localStorage.getItem('productsData')) || [];
+        const updatedProducts = products.map(p => 
+            p.id === product.id ? updatedProduct : p
+        );
+
+        localStorage.setItem('productsData', JSON.stringify(updatedProducts));
+        setProduct(updatedProduct);
+        setIsEditing(false);
+        alert('Описание сохранено!');
     };
 
-    const handleDelete = (userId) => {
-        const updatedUsers = users.filter(user => user.id !== userId);
-        setUsers(updatedUsers);
-        localStorage.setItem('appUsers', JSON.stringify(updatedUsers));
+    const getProductImage = (product) => {
+        return product?.img || 'https://via.placeholder.com/600x400';
     };
 
-    const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (isLoading) {
+        return <div className="loading">Загрузка...</div>;
+    }
+
+    if (!product) {
+        return (
+            <div className="product-not-found">
+                <h2>Товар не найден</h2>
+                <button onClick={() => navigate('/products', { state: { userData: user } })}>
+                    Вернуться к списку товаров
+                </button>
+            </div>
+        );
+    }
 
     return (
-        <div className="admin-container">
-            <div className="admin-header">
-                <h1 className="admin-title">Панель администратора</h1>
-            </div>
-
-            <div className="admin-content">
-                <div className="search-bar">
-                    <input
-                        type="text"
-                        className="search-input"
-                        placeholder="Поиск пользователей..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+        <div className="product-details-page">
+            <nav className="details-nav">
+                <div className="nav-buttons">
+                    <button className="nav-button" onClick={() => navigate(-1, { state: { userData: user } })}>
+                        Назад
+                    </button>
+                    <button
+                        className="nav-button"
+                        onClick={() => navigate('/profile', { state: { userData: user } })}
+                    >
+                        Профиль
+                    </button>
                 </div>
+                <h1 className="details-title">GoslingShop</h1>
+                <div className="nav-placeholder"></div>
+            </nav>
 
-                <table className="users-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Имя</th>
-                            <th>Email</th>
-                            <th>Пароль</th>
-                            <th>Роль</th>
-                            <th>Действия</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredUsers.map(user => (
-                            <tr key={user.id}>
-                                <td>{user.id}</td>
-                                <td>
-                                    {editingUserId === user.id ? (
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={editFormData.name}
-                                            onChange={handleEditFormChange}
-                                        />
-                                    ) : (
-                                        user.name
-                                    )}
-                                </td>
-                                <td>
-                                    {editingUserId === user.id ? (
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            value={editFormData.email}
-                                            onChange={handleEditFormChange}
-                                        />
-                                    ) : (
-                                        user.email
-                                    )}
-                                </td>
-                                <td>
-                                    {editingUserId === user.id ? (
-                                        <input
-                                            type="text"
-                                            name="password"
-                                            value={editFormData.password}
-                                            onChange={handleEditFormChange}
-                                        />
-                                    ) : (
-                                        user.password
-                                    )}
-                                </td>
-                                <td>
-                                    {editingUserId === user.id ? (
-                                        <select
-                                            name="role"
-                                            value={editFormData.role}
-                                            onChange={handleEditFormChange}
+            <div className="main-content-wrapper">
+                <div className="product-details-container">
+                    <div className="product-images">
+                        <img
+                            src={getProductImage(product)}
+                            alt={product.name}
+                            className="main-product-image"
+                            onError={(e) => {
+                                e.target.src = 'https://via.placeholder.com/600x400';
+                            }}
+                        />
+                    </div>
+
+                    <div className="product-info">
+                        <h1 className="product-title">{product.name}</h1>
+                        <p className="product-price">₽{product.price.toFixed(2)}</p>
+                        <p className="product-category">Категория: {product.category}</p>
+
+                        <div className="product-seller">
+                            <h3>Информация о продавце:</h3>
+                            <p>Имя: {product.name_seller || 'Не указано'}</p>
+                            <p>Контакт: {sellerContact || 'Не указан'}</p>
+                        </div>
+
+                        <div className="product-description">
+                            <h3>Описание:</h3>
+                            {isEditing && user?.role === 'superadmin' ? (
+                                <>
+                                    <textarea
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        className="description-textarea"
+                                        rows="5"
+                                    />
+                                    <button 
+                                        className="save-button" 
+                                        onClick={handleSaveDescription}
+                                    >
+                                        Сохранить
+                                    </button>
+                                    <button 
+                                        className="cancel-button" 
+                                        onClick={() => setIsEditing(false)}
+                                    >
+                                        Отмена
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <p>{description || 'Описание отсутствует.'}</p>
+                                    {user?.role === 'superadmin' && (
+                                        <button 
+                                            className="edit-button" 
+                                            onClick={() => setIsEditing(true)}
                                         >
-                                            <option value="user">Пользователь</option>
-                                            <option value="admin">Администратор</option>
-                                        </select>
-                                    ) : (
-                                        user.role || 'user'
+                                            Редактировать описание
+                                        </button>
                                     )}
-                                </td>
-                                <td>
-                                    {editingUserId === user.id ? (
-                                        <>
-                                            <button
-                                                className="action-button save-button"
-                                                onClick={handleSaveClick}
-                                            >
-                                                Сохранить
-                                            </button>
-                                            <button
-                                                className="action-button cancel-button"
-                                                onClick={() => setEditingUserId(null)}
-                                            >
-                                                Отмена
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button
-                                                className="action-button edit-button"
-                                                onClick={() => handleEditClick(user)}
-                                            >
-                                                Редактировать
-                                            </button>
-                                            <button
-                                                className="action-button delete-button"
-                                                onClick={() => handleDelete(user.id)}
-                                            >
-                                                Удалить
-                                            </button>
-                                        </>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                </>
+                            )}
+                        </div>
+
+                        <button 
+                            className="back-button" 
+                            onClick={() => navigate('/products', { state: { userData: user } })}
+                        >
+                            Вернуться к списку товаров
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            <footer className="details-footer">
+                <p>© 2025 GoslingShop. Все права защищены.</p>
+            </footer>
         </div>
     );
 };
 
-export default Admin;
+export default ProductDetails;

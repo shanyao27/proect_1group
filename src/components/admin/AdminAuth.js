@@ -23,7 +23,7 @@ const AdminAuth = () => {
             const authData = {
                 username: user.username,
                 role: user.role,
-                expiresAt: Date.now() + 3600000 // 1 час
+                expiresAt: Date.now() + 3600000 
             };
             
             localStorage.setItem('adminAuth', JSON.stringify(authData));

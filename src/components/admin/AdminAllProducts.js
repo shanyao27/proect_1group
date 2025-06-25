@@ -5,6 +5,7 @@ import './admin.css';
 const AdminAllProducts = () => {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
+    const [sellers, setSellers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchField, setSearchField] = useState('all');
     const [editingProductId, setEditingProductId] = useState(null);
@@ -13,11 +14,12 @@ const AdminAllProducts = () => {
         price: '',
         category: 'Бытовая техника',
         img: '',
-        name_seller: ''
+        name_seller: '',
+        description: ''
     });
     const [imagePreview, setImagePreview] = useState(null);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-    const categories = ['Бытовая техника', 'Еда', 'Лекарства'];
+    const categories = ['Бытовая техника', 'Еда', 'Лекарства', 'Услуги'];
 
     useEffect(() => {
         const authData = JSON.parse(localStorage.getItem('adminAuth'));
@@ -28,6 +30,9 @@ const AdminAllProducts = () => {
 
         const storedProducts = JSON.parse(localStorage.getItem('productsData')) || [];
         setProducts(storedProducts);
+
+        const storedSellers = JSON.parse(localStorage.getItem('sellersData')) || [];
+        setSellers(storedSellers);
     }, [navigate]);
 
     const saveProducts = (productsToSave) => {
@@ -82,11 +87,12 @@ const AdminAllProducts = () => {
                     product.name.toLowerCase().includes(term.toLowerCase()) ||
                     product.price.toString().includes(term) ||
                     product.category.toLowerCase().includes(term.toLowerCase()) ||
-                    product.name_seller.toLowerCase().includes(term.toLowerCase())
+                    product.name_seller.toLowerCase().includes(term.toLowerCase()) ||
+                    (product.description && product.description.toLowerCase().includes(term.toLowerCase()))
                 );
             } else {
                 const value = product[field];
-                return value.toString().toLowerCase().includes(term.toLowerCase());
+                return value && value.toString().toLowerCase().includes(term.toLowerCase());
             }
         });
     };
@@ -98,7 +104,8 @@ const AdminAllProducts = () => {
             price: product.price.toString(),
             category: product.category,
             img: product.img,
-            name_seller: product.name_seller
+            name_seller: product.name_seller,
+            description: product.description || ''
         });
         setImagePreview(product.img);
     };
@@ -112,19 +119,28 @@ const AdminAllProducts = () => {
     };
 
     const handleSaveClick = () => {
+        const price = parseFloat(editFormData.price);
         if (!editFormData.name || !editFormData.price || !editFormData.category) {
             alert('Заполните обязательные поля: Название, Цена и Категория');
             return;
         }
-
+        if (isNaN(price)) {
+            alert('Цена должна быть числом');
+            return;
+        }
+        if (price <= 0) {
+            alert('Цена должна быть больше 0');
+            return;
+        }
 
         const updatedProduct = {
             id: editingProductId,
             name: editFormData.name,
-            price: parseFloat(editFormData.price),
+            price: price,
             category: editFormData.category,
             img: editFormData.img,
-            name_seller: editFormData.name_seller
+            name_seller: editFormData.name_seller,
+            description: editFormData.description
         };
 
         const productExists = products.some(p => p.id === editingProductId);
@@ -144,7 +160,6 @@ const AdminAllProducts = () => {
     };
 
     const handleCancelEdit = () => {
-        // Если товар новый (еще не сохранен), удаляем его из списка
         const productExists = products.some(p => p.id === editingProductId);
         if (!productExists) {
             setProducts(products.filter(p => p.id !== editingProductId));
@@ -159,7 +174,8 @@ const AdminAllProducts = () => {
             price: '',
             category: 'Бытовая техника',
             img: '',
-            name_seller: ''
+            name_seller: '',
+            description: ''
         };
 
         setProducts([...products, newProduct]);
@@ -169,7 +185,8 @@ const AdminAllProducts = () => {
             price: '',
             category: 'Бытовая техника',
             img: '',
-            name_seller: ''
+            name_seller: '',
+            description: ''
         });
         setImagePreview(null);
     };
@@ -190,12 +207,21 @@ const AdminAllProducts = () => {
             <div className="admin-header">
                 <h1 className="admin-title">Управление товарами</h1>
                 <div className="admin-actions">
-                    <button className="action-button users-button" onClick={() => navigate('/admin-panel')}>Пользователи</button>
-                    <button className="action-button add-button" onClick={handleAddNew}>Добавить товар</button>
+                    <button className="action-button users-button" onClick={() => navigate('/admin-panel')}>
+                        Пользователи
+                    </button>
+                    <button className="action-button sellers-button" onClick={() => navigate('/admin-sellers')}>
+                        Продавцы
+                    </button>
+                    <button className="action-button add-button" onClick={handleAddNew}>
+                        Добавить товар
+                    </button>
                     <button className="logout-button" onClick={() => {
                         localStorage.removeItem('adminAuth');
                         navigate('/admin');
-                    }}>Выйти</button>
+                    }}>
+                        Выйти
+                    </button>
                 </div>
             </div>
 
@@ -212,6 +238,7 @@ const AdminAllProducts = () => {
                         <option value="price">Цена</option>
                         <option value="category">Категория</option>
                         <option value="name_seller">Продавец</option>
+                        <option value="description">Описание</option>
                     </select>
                     <input
                         type="text"
@@ -221,7 +248,6 @@ const AdminAllProducts = () => {
                         className="search-input"
                     />
                 </div>
-
 
                 <table className="users-table">
                     <thead>
@@ -249,6 +275,11 @@ const AdminAllProducts = () => {
                             <th>Изображение</th>
                             <th onClick={() => requestSort('name_seller')}>
                                 Продавец {sortConfig.key === 'name_seller' && (
+                                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                                )}
+                            </th>
+                            <th onClick={() => requestSort('description')}>
+                                Описание {sortConfig.key === 'description' && (
                                     <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                 )}
                             </th>
@@ -280,11 +311,11 @@ const AdminAllProducts = () => {
                                             value={editFormData.price}
                                             onChange={handleEditFormChange}
                                             step="0.01"
-                                            min="0"
+                                            min="0.01"
                                             className="edit-input"
                                         />
                                     ) : (
-                                        product.price.toFixed(2) + ' ₽'
+                                        product.price + ' ₽'
                                     )}
                                 </td>
                                 <td>
@@ -296,7 +327,6 @@ const AdminAllProducts = () => {
                                             className="edit-select"
                                         >
                                             {categories.map(category => (
-
                                                 <option key={category} value={category}>{category}</option>
                                             ))}
                                         </select>
@@ -306,7 +336,7 @@ const AdminAllProducts = () => {
                                 </td>
                                 <td>
                                     {editingProductId === product.id ? (
-                                        <div>
+                                        <div className="image-edit-container">
                                             <input
                                                 type="file"
                                                 accept="image/*"
@@ -317,6 +347,7 @@ const AdminAllProducts = () => {
                                                     src={imagePreview}
                                                     alt="Предпросмотр"
                                                     className="product-image-preview"
+                                                    style={{ maxWidth: '100px', maxHeight: '100px' }}
                                                 />
                                             )}
                                         </div>
@@ -326,21 +357,41 @@ const AdminAllProducts = () => {
                                                 src={product.img}
                                                 alt={product.name}
                                                 className="product-image"
+                                                style={{ maxWidth: '100px', maxHeight: '100px' }}
                                             />
                                         )
                                     )}
                                 </td>
                                 <td>
                                     {editingProductId === product.id ? (
-                                        <input
-                                            type="text"
+                                        <select
                                             name="name_seller"
                                             value={editFormData.name_seller}
                                             onChange={handleEditFormChange}
-                                            className="edit-input"
-                                        />
+                                            className="edit-select"
+                                        >
+                                            <option value="">Выберите продавца</option>
+                                            {sellers.map(seller => (
+                                                <option key={seller.id} value={seller.name}>
+                                                    {seller.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     ) : (
                                         product.name_seller
+                                    )}
+                                </td>
+                                <td>
+                                    {editingProductId === product.id ? (
+                                        <textarea
+                                            name="description"
+                                            value={editFormData.description}
+                                            onChange={handleEditFormChange}
+                                            className="description-textarea"
+                                            rows="3"
+                                        />
+                                    ) : (
+                                        product.description || '—'
                                     )}
                                 </td>
                                 <td>
@@ -368,7 +419,6 @@ const AdminAllProducts = () => {
                                                 Редактировать
                                             </button>
                                             <button
-
                                                 className="action-button delete-button"
                                                 onClick={() => handleDelete(product.id)}
                                             >

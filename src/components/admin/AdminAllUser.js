@@ -25,14 +25,12 @@ const AllUser_Admin = () => {
         setUsers(storedUsers);
     }, [navigate]);
 
-    // Остальные обработчики остаются без изменений
-    // handleEditClick, handleEditFormChange, handleSaveClick, handleDelete
     const handleEditClick = (user) => {
         setEditingUserId(user.id);
         setEditFormData({
             name: user.name,
             email: user.email,
-            password: '', // Не показываем текущий пароль
+            password: '', 
             role: user.role || 'user'
         });
     };
@@ -46,7 +44,6 @@ const AllUser_Admin = () => {
     };
 
     const handleSaveClick = () => {
-        // Валидация данных
         if (!editFormData.name || !editFormData.email) {
             alert('Поля "Имя" и "Email" обязательны для заполнения');
             return;
@@ -58,7 +55,7 @@ const AllUser_Admin = () => {
                     ...user,
                     name: editFormData.name,
                     email: editFormData.email,
-                    password: editFormData.password || user.password, // Сохраняем старый пароль если новый не введен
+                    password: editFormData.password || user.password,
                     role: editFormData.role
                 };
             }
@@ -91,10 +88,16 @@ const AllUser_Admin = () => {
                 <h1 className="admin-title">Панель администратора</h1>
                 <div className="admin-actions">
                     <button
+                        className="action-button sellers-button"
+                        onClick={() => navigate('/admin-sellers')}
+                    >
+                        Продавцы
+                    </button>
+                    <button
                         className="action-button products-button"
                         onClick={() => navigate('/admin/all_prod')}
                     >
-                        Все товары
+                        Товары
                     </button>
                     <button
                         className="logout-button"

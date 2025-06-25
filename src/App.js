@@ -8,15 +8,15 @@ import ProductDetails from './components/products/ProductDetails.js';
 import NotFound from './components/NotFound';
 
 import ForgotPassword from './components/login/forgot-password'
-import AdminAuth from './components/admin/AdminAuth'; //авторизация
-import AllUser_Admin from './components/admin/AdminAllUser'; //все пользователи
+import AdminAuth from './components/admin/AdminAuth'; 
+import AllUser_Admin from './components/admin/AdminAllUser'; 
 import AllProduct_Admin from './components/admin/AdminAllProducts'
 import AdminMenu from './components/admin/AdminVariants';
+import AdminAllSellers from './components/admin/AdminAllSellers';
 function App() {
     return (
         <Router>
             <Routes>
-                {/* Публичные маршруты */}
                 <Route path="/" element={<LoginPage />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/menu" element={<Menu />} />
@@ -26,18 +26,9 @@ function App() {
                 <Route path="/admin" element={<AdminAuth />} />
                 <Route path="/admin/all_prod" element={<AllProduct_Admin />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
-                {/* Защищенный маршрут */}
-                <Route
-                    path="/admin-panel"
-                    element={
-                        
-                        <AllUser_Admin />
-                      
-                    }
-                />
-
-                
-                 <Route path="*" element={<NotFound />} /> 
+                <Route path="/admin-sellers" element={<AdminAllSellers />} />
+                <Route path="/admin-panel" element={<AllUser_Admin />}/>
+                <Route path="*" element={<NotFound />} /> 
             </Routes>
         </Router>
     );

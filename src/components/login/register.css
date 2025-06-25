@@ -68,7 +68,7 @@
 }
 
 .success-message {
-    color: #27ae60;
+    color: #3498db;
     background-color: #d5f5e3;
     padding: 15px;
     border-radius: 4px;
@@ -77,7 +77,7 @@
 }
 
 .register-button {
-    background-color: #2ecc71;
+    background-color: #3498db;
     color: white;
     border: none;
     padding: 12px;
@@ -89,7 +89,7 @@
 }
 
     .register-button:hover {
-        background-color: #27ae60;
+        background-color: #3498db;
     }
 
     .register-button:disabled {

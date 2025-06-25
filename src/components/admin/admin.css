@@ -19,6 +19,21 @@
     align-items: center;
 }
 
+.description-textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.users-table td {
+    vertical-align: middle;
+    max-width: 200px;
+    word-wrap: break-word;
+}
+
 .admin-title {
     color: #2c3e50;
     font-size: 24px;
@@ -73,6 +88,21 @@
     justify-content: center;
 }
 
+.sellers-button {
+  background-color: #2196F3;
+  color: white;
+}
+
+.products-button {
+  background-color: #2196F3;
+  color: white;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 
 .edit-button {
     background-color: #3498db;
@@ -150,7 +180,7 @@
     background-color: #3498db;
 }
 
-.users-button:hover, .save-button:hover, .cancel-button:hover, .add-button:hove {
+.users-button:hover, .save-button:hover, .cancel-button:hover, .add-button:hover, .users-button:hover, .add-button:hover, .sellers-button:hover {
     background-color: #2980b9;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);

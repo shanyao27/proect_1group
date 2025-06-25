@@ -22,7 +22,7 @@ const Products = () => {
 
         const handleStorageChange = (e) => {
             if (e.key === 'productsData') {
-                loadProducts(); // Перезагружаем продукты при изменении
+                loadProducts();
             }
         };
 
@@ -30,21 +30,18 @@ const Products = () => {
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
-    // Функция для получения изображения товара
     const getProductImage = (product) => {
         if (product.img) {
-            return product.img; // Используем сохраненное изображение
+            return product.img; 
         }
 
-        // Можно добавить дефолтное изображение
-        return 'https://via.placeholder.com/300'; // Замените на путь к вашему дефолтному изображению
+        return 'https://via.placeholder.com/300'; 
     };
 
     const handleProductClick = (productId) => {
         navigate(`/products/${productId}`, { state: { userData: user } });
     };
 
-    // Состояния для фильтров
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [showFilters, setShowFilters] = useState(false);
@@ -53,13 +50,12 @@ const Products = () => {
         sortDirection: 'asc',
         category: 'all',
         minPrice: 0,
-        maxPrice: Math.max(...products.map(p => p.price), 100000) // Добавим fallback значение
+        maxPrice: Math.max(...products.map(p => p.price), 100000)
     });
 
     const [appliedFilters, setAppliedFilters] = useState({ ...filters });
     const productsPerPage = 6;
 
-    // Фильтрация и сортировка товаров
     const filteredProducts = products
         .filter(product => {
             const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -86,7 +82,6 @@ const Products = () => {
             return appliedFilters.sortDirection === 'asc' ? compareResult : -compareResult;
         });
 
-    // Пагинация
     const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
     const indexOfLastProduct = currentPage * productsPerPage;
     const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -133,7 +128,6 @@ const Products = () => {
         }));
     };
 
-    // Получаем уникальные категории для фильтра
     const categories = [...new Set(products.map(p => p.category))];
 
     return (
@@ -269,7 +263,7 @@ const Products = () => {
                                 alt={product.name}
                                 className="product-image"
                                 onError={(e) => {
-                                    e.target.src = 'https://via.placeholder.com/300'; // Fallback изображение
+                                    e.target.src = 'https://via.placeholder.com/300';
                                 }}
                             />
                             <div className="product-info">

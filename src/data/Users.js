@@ -1,4 +1,3 @@
-// Users.js - имитация базы данных пользователей
 const getFreshUsers = () => JSON.parse(localStorage.getItem('appUsers')) || [];
 
 export const authenticateUser = (email, password) => {

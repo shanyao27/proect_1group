@@ -1,22 +1,15 @@
 import React, { useState, useEffect } from 'react';
-//import './AdminPanel.css'; // Создайте файл стилей
-
 const AdminMenu = () => {
     const [activeTab, setActiveTab] = useState('users');
     const [users, setUsers] = useState([]);
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-
-    // Загрузка данных
     useEffect(() => {
         const loadData = async () => {
             setIsLoading(true);
             try {
-                // Загрузка пользователей
                 const usersData = JSON.parse(localStorage.getItem('appUsers')) || [];
                 setUsers(usersData);
-
-                // Загрузка товаров (пример)
                 const productsData = JSON.parse(localStorage.getItem('products')) || [];
                 setProducts(productsData);
             } catch (error) {
@@ -62,7 +55,6 @@ const AdminMenu = () => {
     );
 };
 
-// Компонент таблицы пользователей
 const UsersTable = ({ users }) => (
     <table className="data-table">
         <thead>
@@ -86,7 +78,6 @@ const UsersTable = ({ users }) => (
     </table>
 );
 
-// Компонент таблицы товаров
 const ProductsTable = ({ products }) => (
     <table className="data-table">
         <thead>

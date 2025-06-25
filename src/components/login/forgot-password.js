@@ -16,8 +16,6 @@ const ForgotPassword = () => {
     setIsLoading(true);
 
     try {
-      // Здесь будет логика отправки запроса на восстановление пароля
-      // В демо-версии просто имитируем успешный запрос
       await new Promise(resolve => setTimeout(resolve, 1000));
       setSuccess('Инструкции по восстановлению пароля отправлены на ваш email');
     } catch (err) {

@@ -4,32 +4,38 @@ import './LoginPage.css';
 import { authenticateUser } from '../../data/Users';
 
 const LoginPage = () => {
-    
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
+    const validateEmailDomain = (email) => {
+        return email.endsWith('@dvfu.ru');
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        
+        if (!validateEmailDomain(email)) {
+            setError('Доступ разрешен только для почт @dvfu.ru');
+            return;
+        }
+
         setIsLoading(true);
 
         try {
-            // Проверяем пользователя
             const user = authenticateUser(email, password);
-            console.log(user);
             if (user) {
                 console.log('Вход выполнен:', user);
-                // Перенаправляем на страницу меню после успешного входа
                 navigate('/menu', {
                     state: {
-                        userData: { // Передаем все данные пользователя
+                        userData: {
                             email: user.email,
                             name: user.name,
                             id: user.id,
-                            role: user.role // Важно: передаем роль
+                            role: user.role
                         }
                     }
                 });
@@ -61,7 +67,7 @@ const LoginPage = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            placeholder="Введите ваш email"
+                            placeholder="Введите ваш email @dvfu.ru"
                         />
                     </div>
 

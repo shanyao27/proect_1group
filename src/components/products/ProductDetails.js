@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-//import './productDetails.css'; // Создайте соответствующий CSS файл
+import './productDetails.css';
 
 const ProductDetails = () => {
     const navigate = useNavigate();
@@ -13,7 +13,6 @@ const ProductDetails = () => {
     useEffect(() => {
         const loadProduct = () => {
             try {
-                console.log(12345);
                 const savedProducts = localStorage.getItem('productsData');
                 if (!savedProducts) throw new Error('No products data');
 
@@ -39,7 +38,7 @@ const ProductDetails = () => {
         if (product?.img) {
             return product.img;
         }
-        return 'https://via.placeholder.com/600'; // Большое изображение для детальной страницы
+        return 'https://via.placeholder.com/600x400';
     };
 
     if (isLoading) {
@@ -75,6 +74,8 @@ const ProductDetails = () => {
                 <div className="nav-placeholder"></div>
             </nav>
 
+            <div className="main-content-wrapper">
+
             <div className="product-details-container">
                 <div className="product-images">
                     <img
@@ -82,7 +83,7 @@ const ProductDetails = () => {
                         alt={product.name}
                         className="main-product-image"
                         onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/600';
+                            e.target.src = 'https://via.placeholder.com/600x400';
                         }}
                     />
                 </div>
@@ -106,6 +107,7 @@ const ProductDetails = () => {
                     <button className="back-button" onClick={() => navigate('/products', { state: { userData: user } })}>
                         Вернуться к списку товаров
                     </button>
+                </div>
                 </div>
             </div>
 

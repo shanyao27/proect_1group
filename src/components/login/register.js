@@ -15,6 +15,10 @@ const Register = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
+    const validateEmailDomain = (email) => {
+        return email.endsWith('@dvfu.ru');
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -27,7 +31,11 @@ const Register = () => {
         e.preventDefault();
         setError('');
 
-        // Валидация
+        if (!validateEmailDomain(formData.email)) {
+            setError('Только почта @dvfu.ru разрешена для регистрации');
+            return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
             setError('Пароли не совпадают');
             return;
@@ -102,7 +110,7 @@ const Register = () => {
                             value={formData.email}
                             onChange={handleChange}
                             required
-                            placeholder="Введите ваш email"
+                            placeholder="Введите ваш email @dvfu.ru"
                         />
                     </div>
 
@@ -139,7 +147,7 @@ const Register = () => {
                 </form>
 
                 <div className="additional-links">
-                    Уже есть аккаунт? <Link to="/login">Войти</Link>
+                    Уже есть аккаунт? <Link to="/">Войти</Link>
                 </div>
             </div>
         </div>

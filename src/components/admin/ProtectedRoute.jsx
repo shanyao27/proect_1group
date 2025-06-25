@@ -7,11 +7,6 @@ const ProtectedRoute = ({ children, requiredRole = 'admin' }) => {
 
     useEffect(() => {
         const authData = JSON.parse(localStorage.getItem('adminAuth'));
-
-        // Проверяем три условия:
-        // 1. Есть ли данные авторизации
-        // 2. Не истек ли токен (если есть expiresAt)
-        // 3. Соответствует ли роль
         const isUnauthorized = (
             !authData ||
             (authData.expiresAt && authData.expiresAt < Date.now()) ||

@@ -4,17 +4,17 @@ const STORAGE_KEY = 'appProducts';
 const initialProducts = [
     {
         id: 1,
-        name: 'Кофемашина DeLonghi Magnifica',
+        name: 'пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ DeLonghi Magnifica',
         price: 35000,
-        category: "Бытовая техника",
+        category: "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
         img: "",
         name_seller: "barash_smesharik"
     },
     {
         id: 2,
-        name: 'Холодильник Samsung Side by Side',
+        name: 'пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Samsung Side by Side',
         price: 120000,
-        category: "Бытовая техника",
+        category: "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
         img: "",
         name_seller: "krosh_smesharik"
     }
@@ -29,7 +29,7 @@ export const getAllProducts = () => {
     const products = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     return products.map(p => ({
         ...p,
-        price: Number(p.price) || 0 // Гарантируем, что price будет числом
+        price: Number(p.price) || 0 
     }));
 };
 
@@ -63,7 +63,7 @@ export const addProduct = (productData) => {
         id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
         ...productData,
         price: Number(productData.price) || 0,
-        category: productData.category || "Без категории"
+        category: productData.category || "пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"
     };
 
     const updatedProducts = [...products, newProduct];
@@ -76,7 +76,7 @@ export const updateProduct = (id, productData) => {
     const products = getAllProducts();
     const index = products.findIndex(p => p.id === id);
 
-    if (index === -1) throw new Error('Товар не найден');
+    if (index === -1) throw new Error('пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ');
 
     const updatedProduct = {
         ...products[index],

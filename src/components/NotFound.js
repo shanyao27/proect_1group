@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './NotFound.css'; // Создайте соответствующий CSS-файл
+import './NotFound.css';
 
 const NotFound = () => {
     const navigate = useNavigate();
@@ -32,7 +32,6 @@ const NotFound = () => {
                 </div>
 
                 <div className="not-found-image">
-                    {/* Можно добавить SVG или изображение */}
                     <svg width="200" height="200" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#4A5568" strokeWidth="2" />
                         <path d="M15 9L9 15" stroke="#4A5568" strokeWidth="2" strokeLinecap="round" />
